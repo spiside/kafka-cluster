@@ -40,6 +40,7 @@ case "$RUN_TYPE" in
     manual)
         bash $@
         ;;
+
     *)
         echo "Invalid run type: $RUN_TYPE"
         exit 1

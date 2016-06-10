@@ -17,6 +17,8 @@ $script - A helpful CLI for wrapping commands
         Runs a kafka container and drops you in a shell.
     stop
         Stops the running containers.
+    up
+        Starts up the kafka cluster and recreates the containers.
 
 EOF
     exit
@@ -45,15 +47,15 @@ case $cmd in
         ;;
 
     shell)
-        docker run --net=$projectname\_default -e RUN_TYPE=manual -it kafkacluster_kafka
-        ;;
-
-    start)
-        docker-compose up -d --force-recreate
+        docker run --net=$projectname\_default -e RUN_TYPE=manual -it $projectname\_kafka
         ;;
 
     stop)
         docker-compose stop
+        ;;
+
+    up)
+        docker-compose up -d --force-recreate
         ;;
 
     *)
