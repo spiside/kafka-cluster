@@ -13,6 +13,10 @@ $script - A helpful CLI for wrapping commands
         kafka nodes, and creates a topic 'test'. 
     cleanup
         Stops the running containers and removes the stopped containers.
+    logs [-f, --follow]
+        Outputs the cluster logs to STDOUT.
+    scale <# of nodes>
+        Scales up the the kafka nodes to the number of nodes entered.
     shell
         Runs a kafka container and drops you in a shell.
     stop
@@ -24,38 +28,54 @@ EOF
     exit
 fi
 
+docker_compose() {
+    docker-compose -p $projectname "$@"
+}
+
 case $cmd in
     bootstrap)
-        # Check that the image exists and, if not, build it.
+        # Check that the image exists and, if not, pull it.
         docker inspect spiside/kafka-cluster &> /dev/null
         if [ $? -ne 0 ]; then
             echo "Docker image doesn't exist, pulling..."
             docker pull spiside/kafka-cluster
         fi
 
+        set -e
         # Start up the containers.
-        docker-compose up -d --force-recreate
-        docker-compose scale kafka=2
-        sleep 3  # hack to wait for kafka to start.
+        docker_compose up -d --force-recreate
+        docker_compose scale kafka=2
+        sleep 3  # wait for kafka to start.
         echo 'bash $KAFKA_HOME/bin/kafka-topics.sh --create --topic test --partitions 2 --replication-factor 2 --zookeeper zookeeper:2181' \
-             | docker run --net=$projectname\_default -e RUN_TYPE=manual -a stdin -i kafkacluster_kafka &> /dev/null
+             | docker run --net=$projectname\_default -e RUN_TYPE=manual -a stdin -i $projectname\_kafka &> /dev/null
         echo "Wrote topic 'test'"
+        echo "Bootstrap ran successfully!"
+        set +e
         ;;
 
     cleanup)
-        docker-compose stop && docker-compose rm -fa
+        docker_compose stop && docker_compose rm -fa
+        ;;
+
+    logs)
+        docker_compose "$@"
+        ;;
+
+    scale)
+        shift
+        docker_compose scale kafka=$1
         ;;
 
     shell)
-        docker run --net=$projectname\_default -e RUN_TYPE=manual -it $projectname\_kafka
+        docker run --net=$projectname\_default -e RUN_TYPE=manual -e ZOOKEEPER_URL=zookeeper:2181 -it $projectname\_kafka
         ;;
 
     stop)
-        docker-compose stop
+        docker_compose $1
         ;;
 
     up)
-        docker-compose up -d --force-recreate
+        docker_compose up -d --force-recreate
         ;;
 
     *)
