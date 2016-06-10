@@ -1,0 +1,20 @@
+version: '2'
+services:
+  zookeeper:
+    image: spiside/kafka-cluster
+    hostname: zookeeper
+    ports:
+      - "2181"
+    environment:
+      RUN_TYPE: "zookeeper"
+  kafka:
+    image: spiside/kafka-cluster
+    hostname: kafka
+    ports:
+      - "9092"
+    environment:
+      RUN_TYPE: "kafka"
+    links:
+      - zookeeper
+    volumes:
+      - /var/run/docker.sock:/docker.sock
