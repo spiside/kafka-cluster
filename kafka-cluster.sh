@@ -18,8 +18,9 @@ $script - A helpful CLI for wrapping commands
         Outputs the cluster logs to STDOUT.
     scale <# of nodes>
         Scales up the the kafka nodes to the number of nodes entered.
-    shell
-        Runs a kafka container and drops you in a shell.
+    shell <container_id:optional>
+        Runs a kafka container and drops you in a shell. If a container id
+        is specified, runs bash in the supplied container.
     stop
         Stops the running containers.
     up
@@ -68,7 +69,12 @@ case $cmd in
         ;;
 
     shell)
-        docker run --net=$projectname\_default -e RUN_TYPE=manual -e ZOOKEEPER_URL=zookeeper:2181 -it $projectname\_kafka
+        shift
+        if [ ! -z $1 ]; then
+            docker exec -it $1 bash
+            exit 0
+        fi
+        docker run --net=$projectname\_default -e RUN_TYPE=manual -e ZOOKEEPER_URL=zookeeper:2181 --hostname kafka-shell -it $kafka_image
         ;;
 
     up)

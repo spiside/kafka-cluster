@@ -110,7 +110,7 @@ work, in your terminal 1 (the producer), type `hello world!`. In terminal 2 (the
 you should see the text pop up like this:
 
 ```
-root@<container-id>:/# $KAFKA_HOME/bin/kafka-console-consumer.sh --topic test --zookeeper $ZOOKEEPER_URL
+root@kafka-shell:/# $KAFKA_HOME/bin/kafka-console-consumer.sh --topic test --zookeeper $ZOOKEEPER_URL
 hello world!
 ```
 
