@@ -151,14 +151,14 @@ Scale up the kafka nodes. In this example it will increase kafka nodes to 4.
 ./kafka-cluster.sh scale 4
 ```
 
+Stops the cluster then removes the stopped containers (recommended).
+```
+./kafka-cluster.sh down
+```
+
 Stop the cluster.
 ```
 ./kafka-cluster.sh stop
-```
-
-Stops the cluster then removes the stopped containers (recommended).
-```
-./kafka-cluster.sh cleanup
 ```
 
 ### Debugging
