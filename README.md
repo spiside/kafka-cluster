@@ -19,7 +19,7 @@ You can install docker from [here](https://docs.docker.com/engine/installation/)
 Once you have docker installed, you can install docker-compose [here](https://docs.docker.com/compose/install/)
 
 **NB**: If you are not in the [docker beta program](https://blog.docker.com/2016/03/docker-for-mac-windows-beta/)
-and are currently using OS X or Windows, you will need to setup a `docker-machine` VM to create the cluster. To learn
+and are currently using macOS or Windows, you will need to setup a `docker-machine` VM to create the cluster. To learn
 more, I highly recommend reading the [documentation](https://docs.docker.com/machine/get-started/)
 before moving on.
 
