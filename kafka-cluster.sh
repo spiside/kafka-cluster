@@ -3,6 +3,7 @@
 cmd=${1:-help}
 script=$(basename $0)
 projectname=kafkacluster
+kafka_image=spiside/kafka-cluster
 
 if [ "$cmd" == "help" ]; then
     cat <<EOF
@@ -11,14 +12,15 @@ $script - A helpful CLI for wrapping commands
     bootstrap
         Starts up the kafka cluster using docker-compose, scales up to two
         kafka nodes, and creates a topic 'test'. 
-    cleanup
+    down
         Stops the running containers and removes the stopped containers.
     logs [-f, --follow]
         Outputs the cluster logs to STDOUT.
     scale <# of nodes>
         Scales up the the kafka nodes to the number of nodes entered.
-    shell
-        Runs a kafka container and drops you in a shell.
+    shell <container_id:optional>
+        Runs a kafka container and drops you in a shell. If a container id
+        is specified, runs bash in the supplied container.
     stop
         Stops the running containers.
     up
@@ -38,7 +40,7 @@ case $cmd in
         docker inspect spiside/kafka-cluster &> /dev/null
         if [ $? -ne 0 ]; then
             echo "Docker image doesn't exist, pulling..."
-            docker pull spiside/kafka-cluster
+            docker pull $kafka_image
         fi
 
         set -e
@@ -47,14 +49,14 @@ case $cmd in
         docker_compose scale kafka=2
         sleep 3  # wait for kafka to start.
         echo 'bash $KAFKA_HOME/bin/kafka-topics.sh --create --topic test --partitions 2 --replication-factor 2 --zookeeper zookeeper:2181' \
-             | docker run --net=$projectname\_default -e RUN_TYPE=manual -a stdin -i $projectname\_kafka &> /dev/null
+             | docker run --net=$projectname\_default -e RUN_TYPE=manual -a stdin -i $kafka_image &> /dev/null
         echo "Wrote topic 'test'"
         echo "Bootstrap ran successfully!"
         set +e
         ;;
 
-    cleanup)
-        docker_compose stop && docker_compose rm -fa
+    down|stop)
+        docker_compose $1
         ;;
 
     logs)
@@ -67,11 +69,12 @@ case $cmd in
         ;;
 
     shell)
-        docker run --net=$projectname\_default -e RUN_TYPE=manual -e ZOOKEEPER_URL=zookeeper:2181 -it $projectname\_kafka
-        ;;
-
-    stop)
-        docker_compose $1
+        shift
+        if [ ! -z $1 ]; then
+            docker exec -it $1 bash
+            exit 0
+        fi
+        docker run --net=$projectname\_default -e RUN_TYPE=manual -e ZOOKEEPER_URL=zookeeper:2181 --hostname kafka-shell -it $kafka_image
         ;;
 
     up)
